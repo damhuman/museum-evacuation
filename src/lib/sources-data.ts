@@ -127,7 +127,7 @@ export const sources: SourceDocument[] = [
     shortName: "ICCROM First Aid",
     fullName: "ICCROM — First Aid to Cultural Heritage in Times of Crisis",
     description: "Міжнародний стандарт першої допомоги культурній спадщині під час кризових ситуацій. Розроблений ICCROM спільно з UNESCO.",
-    url: null,
+    url: "https://www.iccrom.org/sites/default/files/2018-10/fac_toolkit_print_oct-2018.pdf",
     type: "international",
     keyPoints: [
       "Система тріажу: червоний / жовтий / зелений",
@@ -151,7 +151,7 @@ export const sources: SourceDocument[] = [
     shortName: "ICCROM Endangered Heritage",
     fullName: "ICCROM — Endangered Heritage: Emergency Evacuation of Heritage Collections",
     description: "Практичний посібник ICCROM з екстреної евакуації колекцій. Деталізує логістику, пріоритезацію та координацію.",
-    url: null,
+    url: "https://www.iccrom.org/sites/default/files/2020-03/endangeredheritage_toolkit.pdf",
     type: "international",
     keyPoints: [
       "Workflow екстреної евакуації",
