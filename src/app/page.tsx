@@ -17,7 +17,7 @@ function AnimatedWord() {
   }, []);
 
   return (
-    <span className="relative inline-block text-accent">
+    <span className="relative inline-block text-[#F59E0B]">
       <span className="invisible">Логістика</span>
       {rotatingWords.map((word, i) => (
         <span
@@ -92,7 +92,6 @@ export default function HomePage() {
               href="/chat?scenario=emergency"
               className="inline-flex items-center gap-2.5 px-6 py-3 rounded-lg bg-[#991B1B] text-white font-semibold text-sm hover:bg-[#7f1d1d] transition-colors shadow-lg shadow-[#991B1B]/25"
             >
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
               Екстрена евакуація
             </Link>
             <Link
