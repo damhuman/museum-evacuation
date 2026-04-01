@@ -255,44 +255,53 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       <div className="flex-1 overflow-y-auto" role="log" aria-live="polite">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
           {messages.length === 0 && !isStreaming && (
-            <div className="py-10">
-              <div className="text-center mb-8">
-                <p className="font-display text-2xl font-semibold mb-2">Museum<span className="text-accent">AID</span></p>
-                <p className="text-sm text-text-muted max-w-md mx-auto">
-                  {scenario === "emergency"
-                    ? "Опишіть ситуацію: тип колекції, кількість предметів, час, доступний транспорт"
-                    : scenario === "planned"
-                    ? "Опишіть план: колекція, терміни, ресурси, пункт призначення"
-                    : "Задайте питання про евакуацію, пакування або документи"}
-                </p>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] py-10">
+              {/* Logo + context */}
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
+                  <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
+                </svg>
               </div>
+              <p className="font-display text-xl font-semibold mb-1">
+                {scenario === "emergency" ? "Екстрена евакуація" : scenario === "planned" ? "Планова евакуація" : "Чим допомогти?"}
+              </p>
+              <p className="text-xs text-text-muted max-w-sm text-center mb-10">
+                {scenario === "emergency"
+                  ? "Опишіть: тип колекції, кількість, час, транспорт"
+                  : scenario === "planned"
+                  ? "Опишіть: колекція, терміни, ресурси, пункт призначення"
+                  : "Оберіть питання або напишіть своє"}
+              </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-xl mx-auto">
+              {/* Suggestion cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-lg">
                 {(scenario === "emergency" ? [
-                  { text: "200 картин олією, 300 кераміки, 12 годин, 1 мікроавтобус", icon: "🚨" },
-                  { text: "Що вивозити першим?", icon: "🔴" },
-                  { text: "Як швидко запакувати ікони?", icon: "📦" },
-                  { text: "Які документи оформити терміново?", icon: "📋" },
+                  { text: "200 картин, 300 кераміки, 12 годин, 1 авто", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
+                  { text: "Що вивозити першим?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg> },
+                  { text: "Як швидко запакувати ікони?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
+                  { text: "Які документи оформити терміново?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
                 ] : scenario === "planned" ? [
-                  { text: "Плануємо евакуацію 5000 предметів за 2 тижні", icon: "📅" },
-                  { text: "Які документи потрібні для міжобласної евакуації?", icon: "📄" },
-                  { text: "Як організувати пакування текстилю?", icon: "🧵" },
-                  { text: "Хто фінансує евакуацію?", icon: "💰" },
+                  { text: "Евакуація 5000 предметів за 2 тижні", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+                  { text: "Документи для міжобласної евакуації", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
+                  { text: "Як організувати пакування текстилю?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
+                  { text: "Хто фінансує евакуацію?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> },
                 ] : [
-                  { text: "Як запакувати ікону XVIII століття?", icon: "⛪" },
-                  { text: "Хто приймає рішення про евакуацію?", icon: "⚖️" },
-                  { text: "Які документи потрібні?", icon: "📋" },
-                  { text: "Музей у 30 км від фронту — евакуація обов'язкова?", icon: "🗺️" },
-                  { text: "Як пакувати кераміку?", icon: "🏺" },
-                  { text: "Що вивозити першим?", icon: "🔴" },
+                  { text: "Як запакувати ікону XVIII століття?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
+                  { text: "Хто приймає рішення про евакуацію?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
+                  { text: "Які документи потрібні?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
+                  { text: "Музей у 30 км від фронту — евакуація обов'язкова?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> },
+                  { text: "Як пакувати кераміку?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
+                  { text: "Що вивозити першим?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg> },
                 ]).map((q) => (
                   <button
                     key={q.text}
                     onClick={() => sendMessage(q.text)}
-                    className="flex items-start gap-2.5 text-left p-3 rounded-xl border border-border bg-bg-elevated hover:border-accent/30 hover:bg-surface-hover transition-all text-sm group"
+                    className="group flex items-center gap-3 text-left px-4 py-3.5 rounded-xl border border-border bg-bg-elevated hover:border-accent/40 hover:shadow-md transition-all duration-200"
                   >
-                    <span className="text-base flex-shrink-0 mt-0.5" aria-hidden="true">{q.icon}</span>
-                    <span className="text-text-secondary group-hover:text-text transition-colors">{q.text}</span>
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-surface flex items-center justify-center text-text-muted group-hover:text-accent group-hover:bg-accent-soft transition-colors">
+                      {q.icon}
+                    </div>
+                    <span className="text-sm text-text-secondary group-hover:text-text transition-colors leading-snug">{q.text}</span>
                   </button>
                 ))}
               </div>
@@ -333,12 +342,8 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           {isStreaming && !streamingContent && (
             <div className="flex justify-start">
               <div className="bg-bg-elevated border border-border rounded-2xl rounded-bl-md px-5 py-4" aria-label="Завантаження відповіді">
-                <div className="flex items-center gap-2 text-text-muted text-sm">
-                  <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "pulse-dot 1.2s infinite 0s" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "pulse-dot 1.2s infinite 0.2s" }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent" style={{ animation: "pulse-dot 1.2s infinite 0.4s" }} />
-                  </span>
+                <div className="flex items-center gap-3 text-text-muted text-sm">
+                  <div className="w-5 h-5 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
                   <span>Оркестратор аналізує запит...</span>
                 </div>
               </div>
@@ -350,32 +355,42 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border bg-bg/80 backdrop-blur-md p-4">
+      <div className="border-t border-border bg-bg/80 backdrop-blur-md p-3 sm:p-4">
         <form
           onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-          className="max-w-3xl mx-auto flex gap-2"
+          className="max-w-3xl mx-auto relative"
         >
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Опишіть ситуацію або задайте питання..."
-            aria-label="Повідомлення"
-            data-testid="chat-input"
-            className="flex-1 rounded-xl border border-border bg-bg-elevated px-4 py-2.5 text-sm placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-shadow"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || isStreaming}
-            aria-label="Надіслати повідомлення"
-            data-testid="send-button"
-            className="px-4 py-2.5 rounded-xl bg-accent text-accent-text font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
+          <div className="flex items-end gap-2 rounded-2xl border border-border bg-bg-elevated p-1.5 focus-within:ring-2 focus-within:ring-accent/30 focus-within:border-accent/50 transition-shadow">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+              placeholder="Опишіть ситуацію або задайте питання..."
+              aria-label="Повідомлення"
+              data-testid="chat-input"
+              className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none min-w-0"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || isStreaming}
+              aria-label="Надіслати повідомлення"
+              data-testid="send-button"
+              className="flex-shrink-0 w-9 h-9 rounded-xl bg-accent text-accent-text flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
+            >
+              {isStreaming ? (
+                <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              )}
+            </button>
+          </div>
+          <p className="text-[10px] text-text-muted text-center mt-2">
+            MuseumAID може помилятись. Перевіряйте рекомендації за першоджерелами.
+          </p>
         </form>
       </div>
     </div>
