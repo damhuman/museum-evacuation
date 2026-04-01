@@ -38,6 +38,14 @@ function parseActiveAgent(content: string): { active: string | null; completed: 
   return { active, completed: [...new Set(completed)] };
 }
 
+function parseTableRows(lines: string[]): string[][] {
+  return lines
+    .filter((l) => !l.match(/^\|[\s-:|]+\|$/)) // skip separator rows
+    .map((l) =>
+      l.split("|").slice(1, -1).map((cell) => cell.trim())
+    );
+}
+
 function RenderedMarkdown({ content }: { content: string }) {
   const [checked, setChecked] = useState<Record<number, boolean>>({});
   const toggleCheck = (index: number) => {
@@ -47,93 +55,120 @@ function RenderedMarkdown({ content }: { content: string }) {
   const lines = content.split("\n");
   let checkboxIndex = 0;
 
+  // Group consecutive table lines
+  const elements: React.ReactNode[] = [];
+  let tableBuffer: string[] = [];
+  let lineIndex = 0;
+
+  const flushTable = () => {
+    if (tableBuffer.length === 0) return;
+    const rows = parseTableRows(tableBuffer);
+    if (rows.length > 0) {
+      const header = rows[0];
+      const body = rows.slice(1);
+      elements.push(
+        <div key={`table-${lineIndex}`} className="my-3 overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-surface">
+                {header.map((cell, ci) => (
+                  <th key={ci} className="px-3 py-2 text-left font-semibold text-text-secondary border-b border-border whitespace-nowrap">
+                    <SmartText text={cell} />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {body.map((row, ri) => (
+                <tr key={ri} className={ri % 2 === 1 ? "bg-surface/50" : ""}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} className="px-3 py-2 border-b border-border text-text-secondary">
+                      <SmartText text={cell} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    tableBuffer = [];
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    lineIndex = i;
+
+    // Detect table lines (start with |)
+    if (line.trimStart().startsWith("|") && line.trimEnd().endsWith("|")) {
+      tableBuffer.push(line);
+      continue;
+    }
+
+    // Flush any buffered table
+    flushTable();
+
+    // Non-table line rendering
+    const checkMatch = line.match(/^- \[ \] (.+)$/);
+    if (checkMatch) {
+      const idx = checkboxIndex++;
+      elements.push(
+        <label key={i} className="flex items-start gap-2.5 py-1 cursor-pointer group" role="listitem">
+          <input type="checkbox" checked={!!checked[idx]} onChange={() => toggleCheck(idx)} className="mt-0.5 h-4 w-4 rounded border-border-strong accent-accent flex-shrink-0" aria-label={checkMatch[1]} />
+          <span className={`${checked[idx] ? "line-through text-text-muted" : ""} transition-colors`}><SmartText text={checkMatch[1]} /></span>
+        </label>
+      ); continue;
+    }
+    if (line.startsWith("## ")) {
+      elements.push(<h2 key={i} className="font-display text-base font-bold mt-5 mb-1.5 text-text">{line.replace("## ", "")}</h2>); continue;
+    }
+    if (line.startsWith("### ")) {
+      elements.push(<h3 key={i} className="font-medium text-sm mt-4 mb-1 text-text-secondary">{line.replace("### ", "")}</h3>); continue;
+    }
+    if (line.startsWith("> ⚠️")) {
+      elements.push(<div key={i} className="mt-4 px-3 py-2 rounded-lg bg-warning-soft text-warning-text text-xs border border-warning/20">{line.replace("> ", "")}</div>); continue;
+    }
+    if (line.startsWith("> ")) {
+      elements.push(<blockquote key={i} className="border-l-2 border-accent pl-3 my-2 text-text-secondary italic text-sm">{line.replace("> ", "")}</blockquote>); continue;
+    }
+    if (line.startsWith("**Джерело") || line.match(/^Джерело:/) || line.match(/^\*Джерело/)) {
+      const clean = line.replace(/\*\*/g, "").replace(/^\*|\*$/g, "");
+      elements.push(<p key={i} className="text-xs mt-2 font-mono" data-testid="citation"><SmartText text={clean} /></p>); continue;
+    }
+    if (line.startsWith("---")) {
+      elements.push(<hr key={i} className="my-4 border-border" />); continue;
+    }
+    if (line.startsWith("- ❌") || line.startsWith("- ✗")) {
+      elements.push(<p key={i} className="text-danger-text py-0.5 text-sm"><SmartText text={line.replace("- ", "")} /></p>); continue;
+    }
+    if (line.startsWith("- **")) {
+      const match = line.match(/^- \*\*(.+?)\*\*\s*—?\s*(.*)$/);
+      if (match) {
+        elements.push(
+          <div key={i} className="flex gap-1.5 py-0.5 text-sm">
+            <span className="font-semibold flex-shrink-0"><SmartText text={match[1]} /></span>
+            {match[2] && <span className="text-text-secondary">— <SmartText text={match[2]} /></span>}
+          </div>
+        ); continue;
+      }
+    }
+    if (line.startsWith("- ")) {
+      elements.push(<p key={i} className="text-sm py-0.5 pl-3 text-text-secondary"><SmartText text={line} /></p>); continue;
+    }
+    if (line.match(/^\d+\.\s/)) {
+      elements.push(<p key={i} className="text-sm py-0.5 pl-3"><SmartText text={line} /></p>); continue;
+    }
+    if (line.trim() === "") { elements.push(<div key={i} className="h-1.5" />); continue; }
+    elements.push(<p key={i} className="py-0.5 text-sm"><SmartText text={line} /></p>);
+  }
+
+  // Flush remaining table
+  flushTable();
+
   return (
     <div className="space-y-0.5 text-sm leading-relaxed">
-      {lines.map((line, i) => {
-        const checkMatch = line.match(/^- \[ \] (.+)$/);
-        if (checkMatch) {
-          const idx = checkboxIndex++;
-          return (
-            <label key={i} className="flex items-start gap-2.5 py-1 cursor-pointer group" role="listitem">
-              <input
-                type="checkbox"
-                checked={!!checked[idx]}
-                onChange={() => toggleCheck(idx)}
-                className="mt-0.5 h-4 w-4 rounded border-border-strong accent-accent flex-shrink-0"
-                aria-label={checkMatch[1]}
-              />
-              <span className={`${checked[idx] ? "line-through text-text-muted" : ""} transition-colors`}>
-                <SmartText text={checkMatch[1]} />
-              </span>
-            </label>
-          );
-        }
-        if (line.startsWith("## ")) {
-          return (
-            <h2 key={i} className="font-display text-base font-bold mt-5 mb-1.5 text-text flex items-center gap-2">
-              {line.replace("## ", "")}
-            </h2>
-          );
-        }
-        if (line.startsWith("### ")) {
-          return (
-            <h3 key={i} className="font-medium text-sm mt-4 mb-1 text-text-secondary">
-              {line.replace("### ", "")}
-            </h3>
-          );
-        }
-        if (line.startsWith("> ⚠️")) {
-          return (
-            <div key={i} className="mt-4 px-3 py-2 rounded-lg bg-warning-soft text-warning-text text-xs border border-warning/20">
-              {line.replace("> ", "")}
-            </div>
-          );
-        }
-        if (line.startsWith("> ")) {
-          return (
-            <blockquote key={i} className="border-l-2 border-accent pl-3 my-2 text-text-secondary italic text-sm">
-              {line.replace("> ", "")}
-            </blockquote>
-          );
-        }
-        if (line.startsWith("**Джерело") || line.match(/^Джерело:/) || line.match(/^\*Джерело/)) {
-          const clean = line.replace(/\*\*/g, "").replace(/^\*|\*$/g, "");
-          return (
-            <p key={i} className="text-xs mt-2 font-mono" data-testid="citation">
-              <SmartText text={clean} />
-            </p>
-          );
-        }
-        if (line.startsWith("---")) {
-          return <hr key={i} className="my-4 border-border" />;
-        }
-        if (line.startsWith("- ❌") || line.startsWith("- ✗")) {
-          return <p key={i} className="text-danger-text py-0.5 text-sm"><SmartText text={line.replace("- ", "")} /></p>;
-        }
-        if (line.startsWith("- **")) {
-          const match = line.match(/^- \*\*(.+?)\*\*\s*—?\s*(.*)$/);
-          if (match) {
-            return (
-              <div key={i} className="flex gap-1.5 py-0.5 text-sm">
-                <span className="font-semibold flex-shrink-0"><SmartText text={match[1]} /></span>
-                {match[2] && <span className="text-text-secondary">— <SmartText text={match[2]} /></span>}
-              </div>
-            );
-          }
-        }
-        if (line.startsWith("- ")) {
-          return <p key={i} className="text-sm py-0.5 pl-3 text-text-secondary"><SmartText text={line} /></p>;
-        }
-        if (line.match(/^\d+\.\s/)) {
-          return <p key={i} className="text-sm py-0.5 pl-3"><SmartText text={line} /></p>;
-        }
-        if (line.trim() === "") return <div key={i} className="h-1.5" />;
-        return (
-          <p key={i} className="py-0.5 text-sm">
-            <SmartText text={line} />
-          </p>
-        );
-      })}
+      {elements}
     </div>
   );
 }
