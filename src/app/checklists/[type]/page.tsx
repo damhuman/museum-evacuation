@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { checklistTypes } from "@/lib/checklists-data";
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 export default function ChecklistDetailPage() {
   const params = useParams();
@@ -16,8 +15,8 @@ export default function ChecklistDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-10">
         <p className="text-text-muted">Чекліст не знайдено</p>
-        <Link href="/checklists" className="text-accent hover:underline text-sm">
-          ← Всі чеклісти
+        <Link href="/checklists" className="text-accent-text underline text-sm">
+          &larr; Всі чеклісти
         </Link>
       </div>
     );
@@ -33,32 +32,43 @@ export default function ChecklistDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 w-full">
-      <Link href="/checklists" className="text-xs text-accent hover:underline mb-6 inline-flex items-center gap-1">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Всі чеклісти
-      </Link>
+      {/* Breadcrumbs */}
+      <nav className="text-xs text-text-muted mb-6 flex items-center gap-1" aria-label="Breadcrumb">
+        <Link href="/" className="hover:underline">
+          Головна
+        </Link>
+        <span>&gt;</span>
+        <Link href="/checklists" className="hover:underline">
+          Чеклісти
+        </Link>
+        <span>&gt;</span>
+        <span className="text-text font-bold">{checklist.title}</span>
+      </nav>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      <div>
         <div className="flex items-center gap-3 mb-1">
           <span className="text-3xl" aria-hidden="true">{checklist.icon}</span>
-          <h1 className="font-display text-2xl font-bold">{checklist.title}</h1>
+          <h1 className="text-xl font-bold uppercase tracking-widest text-text">
+            {checklist.title}
+          </h1>
         </div>
+        <div className="w-12 h-1 bg-accent mb-3 ml-12" />
         <p className="text-text-secondary text-sm mb-1 ml-12">{checklist.description}</p>
-        <p className="text-[11px] text-accent/80 font-mono mb-6 ml-12" data-testid="checklist-source">
+        <p className="text-[11px] text-text-muted font-bold uppercase tracking-wider mb-6 ml-12" data-testid="checklist-source">
           Джерело: {checklist.source}
         </p>
-      </motion.div>
+      </div>
 
       {/* Progress */}
-      <div className="mb-6 p-4 rounded-xl border border-border bg-bg-elevated">
+      <div className="mb-6 p-4 border border-border bg-bg">
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-text-secondary">Прогрес</span>
-          <span className="font-mono text-sm font-medium" data-testid="progress-text">
+          <span className="text-xs font-bold uppercase tracking-widest text-text-muted">Прогрес</span>
+          <span className="text-sm font-bold text-text" data-testid="progress-text">
             {completedCount} / {totalCount}
           </span>
         </div>
         <div
-          className="w-full h-2 bg-surface rounded-full overflow-hidden"
+          className="w-full h-2 bg-bg-alt overflow-hidden"
           role="progressbar"
           aria-valuenow={progress}
           aria-valuemin={0}
@@ -66,11 +76,9 @@ export default function ChecklistDetailPage() {
           aria-label="Прогрес чеклісту"
           data-testid="progress-bar"
         >
-          <motion.div
-            className="h-full bg-accent rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.3, ease: "easeOut" as const }}
+          <div
+            className="h-full bg-accent"
+            style={{ width: `${progress}%` }}
             data-testid="progress-fill"
           />
         </div>
@@ -78,16 +86,13 @@ export default function ChecklistDetailPage() {
 
       {/* Checklist Items */}
       <div className="space-y-2" data-testid="checklist-items" role="list">
-        {checklist.items.map((item, i) => (
-          <motion.label
+        {checklist.items.map((item) => (
+          <label
             key={item.id}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.04 }}
-            className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all duration-200 ${
+            className={`flex items-start gap-3 p-4 border cursor-pointer ${
               checked[item.id]
-                ? "bg-accent-soft border-accent/30"
-                : "bg-bg-elevated border-border hover:border-border-strong"
+                ? "bg-accent-soft border-accent"
+                : "bg-bg border-border"
             }`}
             role="listitem"
           >
@@ -95,12 +100,12 @@ export default function ChecklistDetailPage() {
               type="checkbox"
               checked={!!checked[item.id]}
               onChange={() => toggleItem(item.id)}
-              className="mt-0.5 h-[18px] w-[18px] rounded border-border-strong accent-accent flex-shrink-0"
+              className="mt-0.5 h-[18px] w-[18px] border-border-strong accent-accent flex-shrink-0"
               aria-label={item.text}
               data-testid={`checkbox-${item.id}`}
             />
             <div>
-              <span className={`text-sm ${checked[item.id] ? "line-through text-text-muted" : ""} transition-colors`}>
+              <span className={`text-sm ${checked[item.id] ? "line-through text-text-muted" : "text-text"}`}>
                 {item.text}
               </span>
               {item.warning && (
@@ -110,7 +115,7 @@ export default function ChecklistDetailPage() {
                 </p>
               )}
             </div>
-          </motion.label>
+          </label>
         ))}
       </div>
 
@@ -120,7 +125,7 @@ export default function ChecklistDetailPage() {
           onClick={() => window.print()}
           aria-label="Друкувати чекліст"
           data-testid="print-button"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-bg-elevated hover:bg-surface-hover text-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 border border-border bg-bg text-sm font-bold uppercase tracking-wider text-text"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Друкувати
@@ -128,7 +133,7 @@ export default function ChecklistDetailPage() {
         <button
           onClick={() => {
             const text = checklist.items
-              .map((item, i) => `${checked[item.id] ? "✅" : "☐"} ${i + 1}. ${item.text}`)
+              .map((item, i) => `${checked[item.id] ? "\u2705" : "\u2610"} ${i + 1}. ${item.text}`)
               .join("\n");
             const blob = new Blob(
               [`${checklist.title}\n${checklist.source}\n\n${text}`],
@@ -143,7 +148,7 @@ export default function ChecklistDetailPage() {
           }}
           aria-label="Експортувати чекліст"
           data-testid="export-button"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-bg-elevated hover:bg-surface-hover text-sm transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-accent-text text-sm font-bold uppercase tracking-wider border border-accent"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Експортувати

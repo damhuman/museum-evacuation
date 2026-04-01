@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { documentTemplates } from "@/lib/documents-data";
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -240,7 +239,7 @@ export default function DocumentDetailPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-10">
         <p className="text-text-muted">Шаблон не знайдено</p>
-        <Link href="/documents" className="text-accent hover:underline text-sm">
+        <Link href="/documents" className="text-text-secondary hover:underline text-sm">
           ← Всі документи
         </Link>
       </div>
@@ -315,61 +314,57 @@ export default function DocumentDetailPage() {
   const totalFields = template.fields.length;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
-      <Link
-        href="/documents"
-        className="text-xs text-accent hover:underline mb-6 inline-flex items-center gap-1"
-      >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-        Всі документи
-      </Link>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 w-full">
+      {/* Breadcrumb */}
+      <nav className="text-xs text-text-muted mb-6 flex items-center gap-1.5">
+        <Link href="/" className="hover:text-text-secondary">
+          Головна
+        </Link>
+        <span>/</span>
+        <Link href="/documents" className="hover:text-text-secondary">
+          Документи
+        </Link>
+        <span>/</span>
+        <span className="text-text">{template.title}</span>
+      </nav>
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+      <div className="mb-8">
         <div className="flex items-center gap-3 mb-1">
-          <span className="text-3xl" aria-hidden="true">
+          <span className="text-2xl" aria-hidden="true">
             {template.icon}
           </span>
-          <h1 className="font-display text-2xl font-bold">{template.title}</h1>
+          <h1 className="text-xl font-bold uppercase tracking-widest text-text">
+            {template.title}
+          </h1>
         </div>
-        <p className="text-text-secondary text-sm mb-1 ml-12">
-          {template.description}
-        </p>
-        <p className="text-[11px] text-accent/80 font-mono mb-6 ml-12">
-          Джерело: {template.source}
-        </p>
-      </motion.div>
+        <div className="ml-10">
+          <p className="text-sm text-text-secondary mb-1">
+            {template.description}
+          </p>
+          <span className="inline-block text-[11px] font-mono text-text-muted bg-bg-alt px-2 py-0.5 rounded-sm border border-border">
+            Джерело: {template.source}
+          </span>
+        </div>
+      </div>
 
       {/* Tabs (mobile) */}
-      <div className="flex gap-1 mb-6 lg:hidden">
+      <div className="flex mb-6 lg:hidden border-b border-border">
         <button
           onClick={() => setActiveTab("form")}
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`flex-1 py-2.5 text-sm font-bold tracking-wide border-b-2 ${
             activeTab === "form"
-              ? "bg-accent-soft text-accent"
-              : "text-text-muted hover:bg-surface-hover"
+              ? "border-accent text-text"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           Заповнити ({filledFields}/{totalFields})
         </button>
         <button
           onClick={() => setActiveTab("preview")}
-          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+          className={`flex-1 py-2.5 text-sm font-bold tracking-wide border-b-2 ${
             activeTab === "preview"
-              ? "bg-accent-soft text-accent"
-              : "text-text-muted hover:bg-surface-hover"
+              ? "border-accent text-text"
+              : "border-transparent text-text-muted hover:text-text-secondary"
           }`}
         >
           Перегляд
@@ -381,7 +376,7 @@ export default function DocumentDetailPage() {
         <div
           className={`${activeTab === "preview" ? "hidden lg:block" : ""}`}
         >
-          <h2 className="font-medium text-sm text-text-secondary mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">
             Заповніть поля
           </h2>
           <div className="space-y-4" data-testid="document-fields">
@@ -393,7 +388,7 @@ export default function DocumentDetailPage() {
                 >
                   {field.label}
                   {field.required && (
-                    <span className="text-danger ml-0.5">*</span>
+                    <span className="text-red-500 ml-0.5">*</span>
                   )}
                 </label>
                 {field.type === "textarea" ? (
@@ -404,7 +399,7 @@ export default function DocumentDetailPage() {
                     placeholder={field.placeholder}
                     rows={3}
                     data-testid={`field-${field.id}`}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-shadow"
+                    className="w-full rounded border border-border bg-white px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-text-secondary"
                   />
                 ) : (
                   <input
@@ -414,7 +409,7 @@ export default function DocumentDetailPage() {
                     onChange={(e) => updateField(field.id, e.target.value)}
                     placeholder={field.placeholder}
                     data-testid={`field-${field.id}`}
-                    className="w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition-shadow"
+                    className="w-full rounded border border-border bg-white px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-text-secondary"
                   />
                 )}
               </div>
@@ -425,7 +420,7 @@ export default function DocumentDetailPage() {
             onClick={exportDoc}
             aria-label="Завантажити документ"
             data-testid="export-pdf-button"
-            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-accent-text font-medium text-sm hover:bg-accent-hover transition-colors"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded bg-accent text-text font-bold text-sm hover:brightness-95"
           >
             <svg
               width="14"
@@ -447,11 +442,11 @@ export default function DocumentDetailPage() {
         <div
           className={`${activeTab === "form" ? "hidden lg:block" : ""}`}
         >
-          <h2 className="font-medium text-sm text-text-secondary mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-4">
             Попередній перегляд
           </h2>
           <div
-            className="rounded-xl border border-border bg-white shadow-sm overflow-auto"
+            className="rounded border border-border bg-white overflow-auto"
             style={{ fontFamily: '"Times New Roman", "DejaVu Serif", serif' }}
             data-testid="document-preview"
           >

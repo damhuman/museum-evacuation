@@ -1,42 +1,37 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-type Theme = "light" | "dark";
-
-const ThemeContext = createContext<{
-  theme: Theme;
-  toggleTheme: () => void;
+const AccessibilityContext = createContext<{
+  fontSize: number;
+  setFontSize: (s: number) => void;
+  highContrast: boolean;
+  toggleContrast: () => void;
 }>({
-  theme: "light",
-  toggleTheme: () => {},
+  fontSize: 16,
+  setFontSize: () => {},
+  highContrast: false,
+  toggleContrast: () => {},
 });
 
-export function useTheme() {
-  return useContext(ThemeContext);
+export function useAccessibility() {
+  return useContext(AccessibilityContext);
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [fontSize, setFontSize] = useState(16);
+  const [highContrast, setHighContrast] = useState(false);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("museumaid-theme") as Theme | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.classList.toggle("dark", stored === "dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    localStorage.setItem("museumaid-theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-  };
+  const toggleContrast = () => setHighContrast((v) => !v);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <AccessibilityContext.Provider value={{ fontSize, setFontSize, highContrast, toggleContrast }}>
+      <div
+        style={{ fontSize: `${fontSize}px` }}
+        className={highContrast ? "high-contrast" : ""}
+      >
+        {children}
+      </div>
+    </AccessibilityContext.Provider>
   );
 }

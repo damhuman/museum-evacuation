@@ -1,65 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { checklistTypes } from "@/lib/checklists-data";
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } },
-};
 
 export default function ChecklistsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 w-full">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <p className="text-xs font-medium tracking-widest uppercase text-accent mb-2">
-          ICCROM · МКІП №424
+      <div>
+        <p className="text-xs font-bold tracking-widest uppercase text-text-muted mb-3">
+          ICCROM / MKIP №424
         </p>
-        <h1 className="font-display text-3xl font-bold mb-2">Чеклісти пакування</h1>
-        <p className="text-text-secondary mb-8">
+        <h1 className="text-2xl font-bold uppercase tracking-widest text-text mb-1">
+          ЧЕКЛІСТИ ПАКУВАННЯ
+        </h1>
+        <div className="w-12 h-1 bg-accent mb-4" />
+        <p className="text-text-secondary text-sm mb-8">
           Покрокові інструкції для безпечного пакування музейних предметів.
-          Базовий принцип: м'який шар → захисний шар → жорсткий контейнер.
+          Базовий принцип: м&#39;який шар &rarr; захисний шар &rarr; жорсткий контейнер.
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         data-testid="checklist-types"
       >
         {checklistTypes.map((cl) => (
-          <motion.div key={cl.id} variants={fadeUp}>
-            <Link
-              href={`/checklists/${cl.id}`}
-              data-testid={`checklist-${cl.id}`}
-              className="group block p-5 rounded-xl border border-border bg-bg-elevated hover:border-accent/30 hover:shadow-md transition-all duration-200"
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-2xl flex-shrink-0" aria-hidden="true">{cl.icon}</span>
-                <div className="min-w-0">
-                  <h2 className="font-display font-semibold text-base group-hover:text-accent transition-colors">
-                    {cl.title}
-                  </h2>
-                  <p className="text-xs text-text-muted mt-1 line-clamp-2">{cl.description}</p>
-                  <p className="text-[11px] text-text-muted mt-2 font-mono">{cl.items.length} кроків</p>
-                </div>
+          <Link
+            key={cl.id}
+            href={`/checklists/${cl.id}`}
+            data-testid={`checklist-${cl.id}`}
+            className="block p-5 border border-border bg-bg"
+          >
+            <div className="flex items-start gap-3">
+              <span className="text-2xl flex-shrink-0" aria-hidden="true">
+                {cl.icon}
+              </span>
+              <div className="min-w-0">
+                <h2 className="font-bold text-base text-text">
+                  {cl.title}
+                </h2>
+                <p className="text-xs text-text-muted mt-1 line-clamp-2">
+                  {cl.description}
+                </p>
+                <span className="inline-block mt-3 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-accent text-accent-text">
+                  {cl.items.length} кроків
+                </span>
               </div>
-            </Link>
-          </motion.div>
+            </div>
+          </Link>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

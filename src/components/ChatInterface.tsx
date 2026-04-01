@@ -396,23 +396,41 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
     }
   }, [input, isStreaming, messages, scenario]);
 
+  const suggestions = scenario === "emergency" ? [
+    "200 картин, 300 кераміки, 12 годин, 1 авто",
+    "Що вивозити першим?",
+    "Як швидко запакувати ікони?",
+    "Які документи оформити терміново?",
+  ] : scenario === "planned" ? [
+    "Евакуація 5000 предметів за 2 тижні",
+    "Документи для міжобласної евакуації",
+    "Як організувати пакування текстилю?",
+    "Хто фінансує евакуацію?",
+  ] : [
+    "Як запакувати ікону XVIII століття?",
+    "Хто приймає рішення про евакуацію?",
+    "Які документи потрібні?",
+    "Музей у 30 км від фронту — евакуація обов'язкова?",
+    "Як пакувати кераміку?",
+    "Що вивозити першим?",
+  ];
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-bg-alt">
       {/* Agent Pipeline */}
       <AgentPipeline activeAgent={activeAgent} completedAgents={completedAgents} />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto" role="log" aria-live="polite">
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
+        <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
           {messages.length === 0 && !isStreaming && (
             <div className="flex flex-col items-center justify-center min-h-[60vh] py-10">
-              {/* Logo + context */}
-              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-5">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5">
+              <div className="w-12 h-12 bg-accent flex items-center justify-center mb-5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="1.5">
                   <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>
                 </svg>
               </div>
-              <p className="font-display text-xl font-semibold mb-1">
+              <p className="text-lg font-bold mb-1">
                 {scenario === "emergency" ? "Екстрена евакуація" : scenario === "planned" ? "Планова евакуація" : "Чим допомогти?"}
               </p>
               <p className="text-xs text-text-muted max-w-sm text-center mb-10">
@@ -424,34 +442,14 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
               </p>
 
               {/* Suggestion cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-lg">
-                {(scenario === "emergency" ? [
-                  { text: "200 картин, 300 кераміки, 12 годин, 1 авто", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
-                  { text: "Що вивозити першим?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg> },
-                  { text: "Як швидко запакувати ікони?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
-                  { text: "Які документи оформити терміново?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-                ] : scenario === "planned" ? [
-                  { text: "Евакуація 5000 предметів за 2 тижні", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-                  { text: "Документи для міжобласної евакуації", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-                  { text: "Як організувати пакування текстилю?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
-                  { text: "Хто фінансує евакуацію?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> },
-                ] : [
-                  { text: "Як запакувати ікону XVIII століття?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
-                  { text: "Хто приймає рішення про евакуацію?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> },
-                  { text: "Які документи потрібні?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
-                  { text: "Музей у 30 км від фронту — евакуація обов'язкова?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> },
-                  { text: "Як пакувати кераміку?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> },
-                  { text: "Що вивозити першим?", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg> },
-                ]).map((q) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
+                {suggestions.map((q) => (
                   <button
-                    key={q.text}
-                    onClick={() => sendMessage(q.text)}
-                    className="group flex items-center gap-3 text-left px-4 py-3.5 rounded-xl border border-border bg-bg-elevated hover:border-accent/40 hover:shadow-md transition-all duration-200"
+                    key={q}
+                    onClick={() => sendMessage(q)}
+                    className="flex items-center gap-3 text-left px-4 py-3 border border-border bg-bg hover:border-text/30 transition-colors border-l-4 border-l-accent"
                   >
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-surface flex items-center justify-center text-text-muted group-hover:text-accent group-hover:bg-accent-soft transition-colors">
-                      {q.icon}
-                    </div>
-                    <span className="text-sm text-text-secondary group-hover:text-text transition-colors leading-snug">{q.text}</span>
+                    <span className="text-sm text-text-secondary leading-snug">{q}</span>
                   </button>
                 ))}
               </div>
@@ -463,8 +461,8 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
               <div
                 className={`max-w-[88%] ${
                   msg.role === "user"
-                    ? "bg-accent text-accent-text rounded-2xl rounded-br-md px-4 py-2.5"
-                    : "bg-bg-elevated border border-border rounded-2xl rounded-bl-md px-5 py-4"
+                    ? "bg-accent-soft border border-accent/30 px-4 py-2.5"
+                    : "bg-bg border border-border px-5 py-4"
                 }`}
                 data-testid={msg.role === "assistant" ? "assistant-message" : "user-message"}
               >
@@ -480,10 +478,7 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           {/* Streaming message */}
           {isStreaming && streamingContent && (
             <div className="flex justify-start">
-              <div
-                className="max-w-[88%] bg-bg-elevated border border-border rounded-2xl rounded-bl-md px-5 py-4"
-                data-testid="assistant-message"
-              >
+              <div className="max-w-[88%] bg-bg border border-border px-5 py-4" data-testid="assistant-message">
                 <RenderedMarkdown content={streamingContent} />
               </div>
             </div>
@@ -491,9 +486,9 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
 
           {isStreaming && !streamingContent && (
             <div className="flex justify-start">
-              <div className="bg-bg-elevated border border-border rounded-2xl rounded-bl-md px-5 py-4" aria-label="Завантаження відповіді">
+              <div className="bg-bg border border-border px-5 py-4" aria-label="Завантаження відповіді">
                 <div className="flex items-center gap-3 text-text-muted text-sm">
-                  <div className="w-5 h-5 rounded-full border-2 border-accent/30 border-t-accent animate-spin" />
+                  <div className="w-5 h-5 rounded-full border-2 border-border border-t-text animate-spin" />
                   <span>Оркестратор аналізує запит...</span>
                 </div>
               </div>
@@ -505,12 +500,12 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       </div>
 
       {/* Input + Export */}
-      <div className="border-t border-border bg-bg/80 backdrop-blur-md p-3 sm:p-4">
+      <div className="border-t border-border bg-bg p-3 sm:p-4">
         <form
           onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-          className="max-w-3xl mx-auto relative"
+          className="max-w-3xl mx-auto"
         >
-          <div className="flex items-end gap-2 rounded-2xl border border-border bg-bg-elevated p-1.5 focus-within:ring-2 focus-within:ring-accent/30 focus-within:border-accent/50 transition-shadow">
+          <div className="flex items-end gap-2 border border-border bg-bg p-1.5 focus-within:border-text/40">
             <input
               ref={inputRef}
               type="text"
@@ -527,14 +522,12 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
               disabled={!input.trim() || isStreaming}
               aria-label="Надіслати повідомлення"
               data-testid="send-button"
-              className="flex-shrink-0 w-9 h-9 rounded-xl bg-accent text-accent-text flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
+              className="flex-shrink-0 px-4 py-2 bg-accent text-accent-text font-bold text-xs uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
             >
               {isStreaming ? (
-                <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <div className="w-4 h-4 rounded-full border-2 border-text/30 border-t-text animate-spin" />
               ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
+                "Надіслати"
               )}
             </button>
           </div>
@@ -557,11 +550,11 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="px-2.5 py-1 rounded-lg border border-border text-xs font-medium text-text-secondary hover:text-accent hover:border-accent/40 hover:bg-accent-soft transition-all flex items-center gap-1.5"
+                  className="px-2.5 py-1 border border-border text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors flex items-center gap-1.5"
                   title="Завантажити як текст"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Скачати .txt
+                  .txt
                 </button>
                 <button
                   onClick={() => {
@@ -580,18 +573,18 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
                       return "<div class='a'>" + html + "</div>";
                     }).join("");
                     const date = new Date().toLocaleString("uk-UA");
-                    const doc = "<!DOCTYPE html><html lang='uk'><head><meta charset='UTF-8'><title>MuseumAID Діалог</title><style>@page{margin:18mm;size:A4}body{font-family:Georgia,'Times New Roman',serif;font-size:12px;line-height:1.7;color:#1a1714;max-width:170mm}h1{font-size:16px;border-bottom:2px solid #B45309;padding-bottom:6px;margin-bottom:4px}h2{font-size:14px;color:#92400E;margin:18px 0 6px;border-bottom:1px solid #e8e2db;padding-bottom:4px}h3{font-size:12px;color:#5c554d;margin:12px 0 4px}.q{background:#f5f0eb;border-left:4px solid #B45309;padding:10px 14px;margin:16px 0;border-radius:0 8px 8px 0}.ql{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;color:#B45309;margin-bottom:4px;text-transform:uppercase}.a{margin:12px 0}hr{border:none;border-top:1px solid #e8e2db;margin:14px 0}.ch{padding:2px 0 2px 16px}.f{margin-top:28px;font-size:9px;color:#9c9488;border-top:1px solid #e8e2db;padding-top:8px;text-align:center}</style></head><body><h1>MuseumAID — Діалог</h1><p style='font-size:10px;color:#9c9488'>" + date + "</p>" + blocks + "<div class='f'>Згенеровано MuseumAID · Довідковий характер — не замінює НПА</div></body></html>";
+                    const doc = "<!DOCTYPE html><html lang='uk'><head><meta charset='UTF-8'><title>MuseumAID Діалог</title><style>@page{margin:18mm;size:A4}body{font-family:'e-Ukraine',system-ui,sans-serif;font-size:12px;line-height:1.7;color:#1a1a1a;max-width:170mm}h1{font-size:16px;border-bottom:2px solid #FFE600;padding-bottom:6px;margin-bottom:4px}h2{font-size:14px;margin:18px 0 6px;border-bottom:1px solid #e0e0e0;padding-bottom:4px}h3{font-size:12px;color:#4a4a4a;margin:12px 0 4px}.q{background:#FFF9CC;border-left:4px solid #FFE600;padding:10px 14px;margin:16px 0}.ql{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;color:#1a1a1a;margin-bottom:4px;text-transform:uppercase}.a{margin:12px 0}hr{border:none;border-top:1px solid #e0e0e0;margin:14px 0}.ch{padding:2px 0 2px 16px}.f{margin-top:28px;font-size:9px;color:#8a8a8a;border-top:1px solid #e0e0e0;padding-top:8px;text-align:center}</style></head><body><h1>MuseumAID — Діалог</h1><p style='font-size:10px;color:#8a8a8a'>" + date + "</p>" + blocks + "<div class='f'>Згенеровано MuseumAID · Довідковий характер — не замінює НПА</div></body></html>";
                     const w = window.open("", "_blank");
                     if (!w) return;
                     w.document.write(doc);
                     w.document.close();
                     setTimeout(() => w.print(), 300);
                   }}
-                  className="px-2.5 py-1 rounded-lg border border-border text-xs font-medium text-text-secondary hover:text-accent hover:border-accent/40 hover:bg-accent-soft transition-all flex items-center gap-1.5"
+                  className="px-2.5 py-1 border border-border text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors flex items-center gap-1.5"
                   title="Зберегти як PDF"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                  Зберегти PDF
+                  PDF
                 </button>
               </div>
             )}

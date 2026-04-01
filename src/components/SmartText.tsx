@@ -149,7 +149,7 @@ export function SmartText({ text }: { text: string }) {
               target="_blank"
               rel="noopener noreferrer"
               title={seg.tooltip}
-              className="inline-flex items-center gap-0.5 text-accent hover:text-accent-hover underline decoration-accent/30 hover:decoration-accent underline-offset-2 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-0.5 text-text font-medium underline decoration-text/30 hover:decoration-text underline-offset-2 transition-colors cursor-pointer"
             >
               {seg.content}
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 opacity-60">
@@ -160,7 +160,7 @@ export function SmartText({ text }: { text: string }) {
         }
         if (seg.type === "citation" && !seg.url) {
           return (
-            <span key={i} className="text-accent font-medium" title={seg.tooltip}>
+            <span key={i} className="font-medium bg-accent-soft px-1" title={seg.tooltip}>
               {seg.content}
             </span>
           );
@@ -171,7 +171,7 @@ export function SmartText({ text }: { text: string }) {
               key={i}
               href={seg.url}
               title={seg.tooltip}
-              className="inline-flex items-center gap-0.5 text-accent hover:text-accent-hover underline decoration-accent/30 hover:decoration-accent underline-offset-2 transition-colors"
+              className="inline-flex items-center gap-0.5 text-text font-medium underline decoration-text/30 hover:decoration-text underline-offset-2 transition-colors"
             >
               {seg.content}
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 opacity-60">

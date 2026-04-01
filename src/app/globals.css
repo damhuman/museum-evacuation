@@ -1,70 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --bg: #FAF8F5;
-  --bg-elevated: #FFFFFF;
-  --text: #1A1714;
-  --text-secondary: #5C554D;
-  --text-muted: #9C9488;
-  --border: #E8E2DB;
-  --border-strong: #D4CCC3;
-  --surface: #F3EFE9;
-  --surface-hover: #EDE8E1;
-
-  --accent: #B45309;
-  --accent-hover: #92400E;
-  --accent-soft: #FEF3C7;
-  --accent-text: #FFFFFF;
-
-  --danger: #991B1B;
-  --danger-soft: #FEE2E2;
-  --danger-text: #991B1B;
-
-  --warning: #92400E;
-  --warning-soft: #FEF3C7;
-  --warning-text: #92400E;
-
-  --success: #166534;
-  --success-soft: #DCFCE7;
-
-  --info: #1E3A5F;
-  --info-soft: #DBEAFE;
+/* ── e-Ukraine font ── */
+@font-face {
+  font-family: "e-Ukraine";
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/e-Ukraine-UltraLight.woff2") format("woff2");
+}
+@font-face {
+  font-family: "e-Ukraine";
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/e-Ukraine-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "e-Ukraine";
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/e-Ukraine-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "e-Ukraine";
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/e-Ukraine-Medium.woff2") format("woff2");
 }
 
-.dark {
-  --bg: #0F0D0B;
-  --bg-elevated: #1A1714;
-  --text: #F5F0EB;
-  --text-secondary: #B8B0A6;
-  --text-muted: #7C756D;
-  --border: #2A2520;
-  --border-strong: #3D362F;
-  --surface: #1A1714;
-  --surface-hover: #252119;
+:root {
+  --bg: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-alt: #F5F5F5;
+  --text: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --text-muted: #8A8A8A;
+  --border: #E0E0E0;
+  --border-strong: #CCCCCC;
+  --surface: #F5F5F5;
+  --surface-hover: #EBEBEB;
 
-  --accent: #D97706;
-  --accent-hover: #F59E0B;
-  --accent-soft: rgba(217, 119, 6, 0.12);
-  --accent-text: #FFFFFF;
+  --accent: #FFE600;
+  --accent-hover: #E6CF00;
+  --accent-soft: #FFF9CC;
+  --accent-text: #1A1A1A;
 
-  --danger: #EF4444;
-  --danger-soft: rgba(239, 68, 68, 0.12);
-  --danger-text: #FCA5A5;
+  --danger: #D32F2F;
+  --danger-soft: #FDECEA;
+  --danger-text: #C62828;
 
-  --warning: #F59E0B;
-  --warning-soft: rgba(245, 158, 11, 0.12);
-  --warning-text: #FDE68A;
+  --warning: #F57C00;
+  --warning-soft: #FFF3E0;
+  --warning-text: #E65100;
 
-  --success: #22C55E;
-  --success-soft: rgba(34, 197, 94, 0.12);
+  --success: #2E7D32;
+  --success-soft: #E8F5E9;
 
-  --info: #60A5FA;
-  --info-soft: rgba(96, 165, 250, 0.12);
+  --info: #1565C0;
+  --info-soft: #E3F2FD;
+
+  --footer-bg: #1A1A1A;
+  --footer-text: #FFFFFF;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-bg-elevated: var(--bg-elevated);
+  --color-bg-alt: var(--bg-alt);
   --color-text: var(--text);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
@@ -86,15 +86,18 @@
   --color-success-soft: var(--success-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  --font-display: var(--font-playfair);
-  --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-jetbrains);
+  --color-footer-bg: var(--footer-bg);
+  --color-footer-text: var(--footer-text);
+  --font-body: "e-Ukraine", system-ui, sans-serif;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-family: "e-Ukraine", system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -105,25 +108,7 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: white;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  25% { background-position: 100% 0%; }
-  50% { background-position: 100% 100%; }
-  75% { background-position: 0% 100%; }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  color: var(--text);
 }
 
 @keyframes pulse-dot {
@@ -131,18 +116,9 @@ body {
   50% { opacity: 1; }
 }
 
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out both;
+/* ── Print styles ── */
+@media print {
+  nav, .no-print, footer { display: none !important; }
+  body { font-size: 12px; }
+  * { background: white !important; color: black !important; }
 }
-
-.animate-gradient {
-  background-size: 300% 300%;
-  animation: gradient-shift 12s ease infinite;
-}
-
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }

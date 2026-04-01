@@ -1,26 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navigation } from "@/components/Navigation";
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin", "latin-ext"],
-  display: "swap",
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
+import { Footer } from "@/components/Footer";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,7 +12,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "MuseumAID — Евакуація музейних предметів",
-  description: "AI-система підтримки рішень для евакуації музейних предметів під час воєнного стану",
+  description:
+    "AI-система підтримки рішень для евакуації музейних предметів під час воєнного стану",
 };
 
 export default function RootLayout({
@@ -39,17 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="uk"
-      className={`${playfair.variable} ${dmSans.variable} ${jetbrains.variable} h-full`}
-      suppressHydrationWarning
-    >
+    <html lang="uk" className="h-full">
       <body className="min-h-full flex flex-col bg-bg text-text">
         <ThemeProvider>
           <Navigation />
-          <main className="flex-1 flex flex-col pb-14 lg:pb-0" role="main" aria-label="Основний вміст">
+          <main
+            className="flex-1 flex flex-col pb-14 lg:pb-0"
+            role="main"
+            aria-label="Основний вміст"
+          >
             {children}
           </main>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
