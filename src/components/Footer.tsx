@@ -1,6 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/chat")) return null;
+
   return (
     <footer className="bg-footer-bg text-footer-text no-print hidden lg:block">
       {/* Gov links */}
