@@ -142,6 +142,7 @@ export default function DocumentDetailPage() {
               <div key={field.id}>
                 <label htmlFor={field.id} className="block text-xs font-medium text-text-secondary mb-1.5">
                   {field.label}
+                  {field.required && <span className="text-danger ml-0.5">*</span>}
                 </label>
                 {field.type === "textarea" ? (
                   <textarea
