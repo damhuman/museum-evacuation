@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -22,6 +22,12 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "MuseumAID — Евакуація музейних предметів",
   description: "AI-система підтримки рішень для евакуації музейних предметів під час воєнного стану",
@@ -41,7 +47,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-bg text-text">
         <ThemeProvider>
           <Navigation />
-          <main className="flex-1 flex flex-col" role="main" aria-label="Основний вміст">
+          <main className="flex-1 flex flex-col pb-14 lg:pb-0" role="main" aria-label="Основний вміст">
             {children}
           </main>
         </ThemeProvider>
