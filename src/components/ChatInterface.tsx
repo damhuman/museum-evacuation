@@ -407,31 +407,41 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="text-[10px] text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-lg border border-border text-xs font-medium text-text-secondary hover:text-accent hover:border-accent/40 hover:bg-accent-soft transition-all flex items-center gap-1.5"
                   title="Завантажити як текст"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  .txt
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Скачати .txt
                 </button>
                 <button
                   onClick={() => {
-                    const text = messages.map((m) =>
-                      m.role === "user" ? "> Запит: " + m.content : m.content
-                    ).join("\n\n---\n\n");
-                    const header = "MuseumAID — Діалог\n" + new Date().toLocaleString("uk-UA");
-                    const body = header + "\n\n" + text;
-                    const html = "<!DOCTYPE html><html lang='uk'><head><meta charset='UTF-8'><title>MuseumAID</title><style>@page{margin:20mm;size:A4}body{font-family:'Times New Roman',serif;font-size:13px;line-height:1.7;color:#1a1a1a;max-width:170mm;white-space:pre-wrap}hr{border:none;border-top:1px solid #ddd;margin:16px 0}.f{margin-top:32px;font-size:10px;color:#888;border-top:1px solid #ddd;padding-top:8px}</style></head><body>" + body.replace(/</g, "&lt;") + "<div class='f'>Згенеровано MuseumAID</div></body></html>";
+                    const blocks = messages.map((m) => {
+                      if (m.role === "user") {
+                        return "<div class='q'><span class='ql'>ЗАПИТ</span>" + m.content.replace(/</g, "&lt;") + "</div>";
+                      }
+                      const html = m.content
+                        .replace(/</g, "&lt;")
+                        .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+                        .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+                        .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+                        .replace(/^- \[ \] (.+)$/gm, "<div class='ch'>☐ $1</div>")
+                        .replace(/^---$/gm, "<hr/>")
+                        .replace(/\n/g, "<br/>");
+                      return "<div class='a'>" + html + "</div>";
+                    }).join("");
+                    const date = new Date().toLocaleString("uk-UA");
+                    const doc = "<!DOCTYPE html><html lang='uk'><head><meta charset='UTF-8'><title>MuseumAID Діалог</title><style>@page{margin:18mm;size:A4}body{font-family:Georgia,'Times New Roman',serif;font-size:12px;line-height:1.7;color:#1a1714;max-width:170mm}h1{font-size:16px;border-bottom:2px solid #B45309;padding-bottom:6px;margin-bottom:4px}h2{font-size:14px;color:#92400E;margin:18px 0 6px;border-bottom:1px solid #e8e2db;padding-bottom:4px}h3{font-size:12px;color:#5c554d;margin:12px 0 4px}.q{background:#f5f0eb;border-left:4px solid #B45309;padding:10px 14px;margin:16px 0;border-radius:0 8px 8px 0}.ql{display:inline-block;font-size:9px;font-weight:700;letter-spacing:1px;color:#B45309;margin-bottom:4px;text-transform:uppercase}.a{margin:12px 0}hr{border:none;border-top:1px solid #e8e2db;margin:14px 0}.ch{padding:2px 0 2px 16px}.f{margin-top:28px;font-size:9px;color:#9c9488;border-top:1px solid #e8e2db;padding-top:8px;text-align:center}</style></head><body><h1>MuseumAID — Діалог</h1><p style='font-size:10px;color:#9c9488'>" + date + "</p>" + blocks + "<div class='f'>Згенеровано MuseumAID · Довідковий характер — не замінює НПА</div></body></html>";
                     const w = window.open("", "_blank");
                     if (!w) return;
-                    w.document.write(html);
+                    w.document.write(doc);
                     w.document.close();
                     setTimeout(() => w.print(), 300);
                   }}
-                  className="text-[10px] text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-lg border border-border text-xs font-medium text-text-secondary hover:text-accent hover:border-accent/40 hover:bg-accent-soft transition-all flex items-center gap-1.5"
                   title="Зберегти як PDF"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                  .pdf
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  Зберегти PDF
                 </button>
               </div>
             )}
