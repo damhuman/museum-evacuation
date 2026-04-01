@@ -354,7 +354,7 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
         </div>
       </div>
 
-      {/* Input */}
+      {/* Input + Export */}
       <div className="border-t border-border bg-bg/80 backdrop-blur-md p-3 sm:p-4">
         <form
           onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
@@ -388,9 +388,54 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
               )}
             </button>
           </div>
-          <p className="text-[10px] text-text-muted text-center mt-2">
-            MuseumAID може помилятись. Перевіряйте рекомендації за першоджерелами.
-          </p>
+          <div className="flex items-center justify-center gap-3 mt-2">
+            <p className="text-[10px] text-text-muted">
+              MuseumAID може помилятись. Перевіряйте за першоджерелами.
+            </p>
+            {messages.length > 0 && (
+              <div className="flex gap-1">
+                <button
+                  onClick={() => {
+                    const text = messages.map((m) =>
+                      `${m.role === "user" ? "ЗАПИТ" : "MUSEUMAID"}:\n${m.content}`
+                    ).join("\n\n---\n\n");
+                    const blob = new Blob([`MuseumAID — Діалог\n${new Date().toLocaleString("uk-UA")}\n\n${"=".repeat(50)}\n\n${text}\n`], { type: "text/plain;charset=utf-8" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `museumaid-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="text-[10px] text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                  title="Завантажити як текст"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  .txt
+                </button>
+                <button
+                  onClick={() => {
+                    const text = messages.map((m) =>
+                      m.role === "user" ? "> Запит: " + m.content : m.content
+                    ).join("\n\n---\n\n");
+                    const header = "MuseumAID — Діалог\n" + new Date().toLocaleString("uk-UA");
+                    const body = header + "\n\n" + text;
+                    const html = "<!DOCTYPE html><html lang='uk'><head><meta charset='UTF-8'><title>MuseumAID</title><style>@page{margin:20mm;size:A4}body{font-family:'Times New Roman',serif;font-size:13px;line-height:1.7;color:#1a1a1a;max-width:170mm;white-space:pre-wrap}hr{border:none;border-top:1px solid #ddd;margin:16px 0}.f{margin-top:32px;font-size:10px;color:#888;border-top:1px solid #ddd;padding-top:8px}</style></head><body>" + body.replace(/</g, "&lt;") + "<div class='f'>Згенеровано MuseumAID</div></body></html>";
+                    const w = window.open("", "_blank");
+                    if (!w) return;
+                    w.document.write(html);
+                    w.document.close();
+                    setTimeout(() => w.print(), 300);
+                  }}
+                  className="text-[10px] text-text-muted hover:text-accent transition-colors flex items-center gap-1"
+                  title="Зберегти як PDF"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  .pdf
+                </button>
+              </div>
+            )}
+          </div>
         </form>
       </div>
     </div>
