@@ -116,6 +116,29 @@ body {
   50% { opacity: 1; }
 }
 
+/* ── High contrast mode ── */
+.high-contrast {
+  --bg: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-alt: #FFFFFF;
+  --text: #000000;
+  --text-secondary: #000000;
+  --text-muted: #333333;
+  --border: #000000;
+  --border-strong: #000000;
+  --surface: #FFFFFF;
+  --surface-hover: #E0E0E0;
+  --accent: #FFE600;
+  --accent-hover: #FFD000;
+  --accent-soft: #FFE600;
+  --accent-text: #000000;
+  --danger: #FF0000;
+  --danger-soft: #FFCCCC;
+  --danger-text: #FF0000;
+  --footer-bg: #000000;
+  --footer-text: #FFFFFF;
+}
+
 /* ── Print styles ── */
 @media print {
   nav, .no-print, footer { display: none !important; }
