@@ -46,15 +46,12 @@ export default function ChecklistDetailPage() {
       </nav>
 
       <div>
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-3xl" aria-hidden="true">{checklist.icon}</span>
-          <h1 className="text-xl font-bold uppercase tracking-widest text-text">
-            {checklist.title}
-          </h1>
-        </div>
-        <div className="w-12 h-1 bg-accent mb-3 ml-12" />
-        <p className="text-text-secondary text-sm mb-1 ml-12">{checklist.description}</p>
-        <p className="text-[11px] text-text-muted font-bold uppercase tracking-wider mb-6 ml-12" data-testid="checklist-source">
+        <h1 className="text-xl font-bold uppercase tracking-widest text-text mb-1">
+          {checklist.title}
+        </h1>
+        <div className="w-12 h-1 bg-accent mb-3" />
+        <p className="text-text-secondary text-sm mb-1">{checklist.description}</p>
+        <p className="text-[11px] text-text-muted font-bold uppercase tracking-wider mb-6" data-testid="checklist-source">
           Джерело: {checklist.source}
         </p>
       </div>

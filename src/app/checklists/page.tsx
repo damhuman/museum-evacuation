@@ -31,10 +31,7 @@ export default function ChecklistsPage() {
             data-testid={`checklist-${cl.id}`}
             className="block p-5 border border-border bg-bg"
           >
-            <div className="flex items-start gap-3">
-              <span className="text-2xl flex-shrink-0" aria-hidden="true">
-                {cl.icon}
-              </span>
+            <div>
               <div className="min-w-0">
                 <h2 className="font-bold text-base text-text">
                   {cl.title}

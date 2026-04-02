@@ -329,15 +329,11 @@ export default function DocumentDetailPage() {
       </nav>
 
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-2xl" aria-hidden="true">
-            {template.icon}
-          </span>
-          <h1 className="text-xl font-bold uppercase tracking-widest text-text">
-            {template.title}
-          </h1>
-        </div>
-        <div className="ml-10">
+        <h1 className="text-xl font-bold uppercase tracking-widest text-text mb-1">
+          {template.title}
+        </h1>
+        <div className="w-12 h-1 bg-accent mb-3" />
+        <div>
           <p className="text-sm text-text-secondary mb-1">
             {template.description}
           </p>

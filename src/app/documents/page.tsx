@@ -31,10 +31,7 @@ export default function DocumentsPage() {
             data-testid={`document-${doc.id}`}
             className="group block p-5 rounded border border-border bg-white hover:border-text-muted"
           >
-            <div className="flex items-start gap-3">
-              <span className="text-2xl flex-shrink-0" aria-hidden="true">
-                {doc.icon}
-              </span>
+            <div>
               <div className="min-w-0">
                 <h2 className="font-bold text-sm text-text group-hover:text-text">
                   {doc.title}

@@ -17,7 +17,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "zhyvopys",
     title: "Живопис",
-    icon: "🖼️",
+    icon: "",
     description: "Картини олією, темпера, акварель на полотні та дошці",
     source: "МКІП №424, р.3.1; ICCROM First Aid, p.47",
     items: [
@@ -33,7 +33,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "keramika",
     title: "Кераміка",
-    icon: "🏺",
+    icon: "",
     description: "Порцеляна, фаянс, теракота, глазурована кераміка",
     source: "МКІП №424, р.3.3; ICCROM First Aid, p.52",
     items: [
@@ -49,7 +49,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "tekstyl",
     title: "Текстиль",
-    icon: "🧵",
+    icon: "",
     description: "Килими, гобелени, одяг, прапори, вишивки",
     source: "МКІП №424, р.3.5; ICCROM First Aid, p.55",
     items: [
@@ -65,7 +65,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "numizmatyka",
     title: "Нумізматика",
-    icon: "🪙",
+    icon: "",
     description: "Монети, медалі, ордени, жетони",
     source: "МКІП №424, р.3.7; Інструкція №580",
     items: [
@@ -81,7 +81,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "skulptura",
     title: "Скульптура",
-    icon: "🗿",
+    icon: "",
     description: "Камінь, гіпс, дерево, бронза, мармур",
     source: "МКІП №424, р.3.2; ICCROM First Aid, p.50",
     items: [
@@ -97,7 +97,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "dokumenty",
     title: "Документи та книги",
-    icon: "📜",
+    icon: "",
     description: "Рукописи, стародруки, архівні документи, карти",
     source: "МКІП №424, р.3.6; ICCROM First Aid, p.58",
     items: [
@@ -113,7 +113,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "ikony",
     title: "Іконопис",
-    icon: "⛪",
+    icon: "",
     description: "Ікони на дереві, темпера, олія, із окладами",
     source: "МКІП №424, р.3.1; ICCROM First Aid, p.47",
     items: [
@@ -129,7 +129,7 @@ export const checklistTypes: ChecklistType[] = [
   {
     id: "metal",
     title: "Метал",
-    icon: "⚔️",
+    icon: "",
     description: "Зброя, посуд, декоративний метал, археологія",
     source: "МКІП №424, р.3.4; ICCROM First Aid, p.53",
     items: [
