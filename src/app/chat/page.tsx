@@ -9,7 +9,7 @@ function ChatContent() {
   const scenario = searchParams.get("scenario") || undefined;
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100dvh-7rem)] lg:h-[calc(100dvh-6rem)]">
+    <div className="flex flex-col h-[calc(100dvh-7rem)] lg:h-[calc(100dvh-6rem)] overflow-hidden">
       <ChatInterface scenario={scenario} />
     </div>
   );
