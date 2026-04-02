@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <AccessibilityContext.Provider value={{ fontSize, setFontSize, highContrast, toggleContrast }}>
       <div
         style={{ fontSize: `${fontSize}px` }}
-        className={highContrast ? "high-contrast" : ""}
+        className={`min-h-full flex flex-col flex-1${highContrast ? " high-contrast" : ""}`}
       >
         {children}
       </div>
