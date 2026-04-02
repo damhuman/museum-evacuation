@@ -45,15 +45,25 @@ export async function* runAgents(
   const agents = orchestratorResult.agents;
   const context = buildAgentContext(orchestratorResult);
   const showHeaders = agents.length > 1;
+  const previousOutputs: string[] = [];
 
   for (let i = 0; i < agents.length; i++) {
     const agentName = agents[i];
-    const systemPrompt = loadPrompt(agentName) + context;
+    let systemPrompt = loadPrompt(agentName) + context;
+
+    // Pass previous agents' output as context
+    if (previousOutputs.length > 0) {
+      systemPrompt +=
+        "\n\n[ВІДПОВІДІ ПОПЕРЕДНІХ АГЕНТІВ — враховуй їх, не дублюй]\n" +
+        previousOutputs.join("\n---\n");
+    }
 
     if (showHeaders) {
       if (i > 0) yield "\n\n---\n\n";
       yield AGENT_HEADERS[agentName];
     }
+
+    let agentOutput = "";
 
     const stream = client.messages.stream({
       model: "claude-haiku-4-5-20251001",
@@ -67,9 +77,12 @@ export async function* runAgents(
 
     for await (const event of stream) {
       if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        agentOutput += event.delta.text;
         yield event.delta.text;
       }
     }
+
+    previousOutputs.push(`[${agentName}]: ${agentOutput}`);
   }
 
   yield "\n\n---\n\n> ⚠️ Інформація має довідковий характер і не замінює нормативно-правові акти.";
