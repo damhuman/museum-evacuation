@@ -3,11 +3,123 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AgentPipeline } from "./AgentPipeline";
 import { SmartText } from "./SmartText";
+import {
+  parseInventoryFile,
+  inventoryToPromptContext,
+  type ParsedInventory,
+} from "@/lib/inventory";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  displayText?: string;
+  inventory?: ParsedInventory;
+}
+
+const PRIORITY_STYLES: Record<"red" | "yellow" | "green", string> = {
+  red: "bg-red-100 text-red-900 border-red-300 dark:bg-red-900/30 dark:text-red-200 dark:border-red-700",
+  yellow:
+    "bg-yellow-100 text-yellow-900 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700",
+  green:
+    "bg-green-100 text-green-900 border-green-300 dark:bg-green-900/30 dark:text-green-200 dark:border-green-700",
+};
+
+function InventoryPreview({ inv }: { inv: ParsedInventory }) {
+  const topMaterials = Object.entries(inv.materialsSummary)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
+
+  return (
+    <div className="mb-2 border border-accent/40 bg-bg/60 rounded-sm">
+      <div className="px-3 py-2 border-b border-border flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="8" y1="13" x2="16" y2="13" />
+            <line x1="8" y1="17" x2="16" y2="17" />
+          </svg>
+          <span className="text-xs font-semibold truncate">{inv.sourceFileName}</span>
+        </div>
+        <span className="text-[10px] font-mono text-text-muted whitespace-nowrap">
+          {inv.totalItems} позицій · {inv.totalUnits} од.
+        </span>
+      </div>
+      <div className="px-3 py-2 flex flex-wrap gap-1.5 border-b border-border">
+        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${PRIORITY_STYLES.red}`}>
+          🔴 {inv.prioritized.red}
+        </span>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${PRIORITY_STYLES.yellow}`}>
+          🟡 {inv.prioritized.yellow}
+        </span>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${PRIORITY_STYLES.green}`}>
+          🟢 {inv.prioritized.green}
+        </span>
+      </div>
+      {topMaterials.length > 0 && (
+        <div className="px-3 py-2 border-b border-border">
+          <div className="text-[10px] uppercase tracking-wider text-text-muted mb-1">
+            Матеріали
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {topMaterials.map(([mat, count]) => (
+              <span
+                key={mat}
+                className="text-[10px] px-1.5 py-0.5 bg-surface border border-border rounded text-text-secondary"
+              >
+                {mat} · {count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      <div className="max-h-48 overflow-y-auto">
+        <table className="w-full text-[11px]">
+          <thead className="bg-surface/60 sticky top-0">
+            <tr className="text-text-muted">
+              <th className="px-2 py-1 text-left font-semibold">#</th>
+              <th className="px-2 py-1 text-left font-semibold">Назва</th>
+              <th className="px-2 py-1 text-left font-semibold">Матеріал</th>
+              <th className="px-2 py-1 text-center font-semibold">Пріор.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {inv.items.slice(0, 20).map((it, i) => (
+              <tr key={i} className={i % 2 === 1 ? "bg-surface/30" : ""}>
+                <td className="px-2 py-1 font-mono text-text-muted">
+                  {it.id || i + 1}
+                </td>
+                <td className="px-2 py-1 text-text truncate max-w-[180px]" title={it.name}>
+                  {it.name}
+                </td>
+                <td className="px-2 py-1 text-text-secondary truncate max-w-[140px]">
+                  {it.material || "—"}
+                </td>
+                <td className="px-2 py-1 text-center">
+                  <span
+                    className={`inline-block w-2 h-2 rounded-full ${
+                      it.priority === "red"
+                        ? "bg-red-500"
+                        : it.priority === "yellow"
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
+                    aria-label={it.priority}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {inv.items.length > 20 && (
+          <div className="px-2 py-1 text-[10px] text-text-muted text-center">
+            +{inv.items.length - 20} ще…
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function parseActiveAgent(content: string): { active: string | null; completed: string[] } {
@@ -328,8 +440,44 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [attachedInventory, setAttachedInventory] =
+    useState<ParsedInventory | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = useCallback(async (file: File) => {
+    setUploadError(null);
+    setIsParsing(true);
+    try {
+      const parsed = await parseInventoryFile(file);
+      setAttachedInventory(parsed);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Не вдалося прочитати файл.");
+      setAttachedInventory(null);
+    } finally {
+      setIsParsing(false);
+    }
+  }, []);
+
+  const loadDemoFile = useCallback(async () => {
+    setUploadError(null);
+    setIsParsing(true);
+    try {
+      const res = await fetch("/demo/mfu-inventory.csv");
+      if (!res.ok) throw new Error("Демо-файл недоступний.");
+      const blob = await res.blob();
+      const file = new File([blob], "mfu-inventory.csv", { type: "text/csv" });
+      const parsed = await parseInventoryFile(file);
+      setAttachedInventory(parsed);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Не вдалося завантажити демо.");
+    } finally {
+      setIsParsing(false);
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -345,13 +493,28 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
 
   const sendMessage = useCallback(async (overrideText?: string) => {
     const messageText = (overrideText || input).trim();
-    if (!messageText || isStreaming) return;
+    const inv = attachedInventory;
+    if ((!messageText && !inv) || isStreaming) return;
+
+    const textForUser = messageText || (inv
+      ? "Проаналізуй інвентар: склади план евакуації — що вивозити першим, як пакувати, які документи потрібні."
+      : "");
+
+    const apiContent = inv
+      ? `${inventoryToPromptContext(inv)}\n\n---\n\n${textForUser}`
+      : textForUser;
 
     setInput("");
+    setAttachedInventory(null);
+    setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: messageText,
+      content: apiContent,
+      displayText: textForUser,
+      inventory: inv || undefined,
     };
     setMessages((prev) => [...prev, userMsg]);
     setIsStreaming(true);
@@ -394,7 +557,7 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       setIsStreaming(false);
       setStreamingContent("");
     }
-  }, [input, isStreaming, messages, scenario]);
+  }, [input, isStreaming, messages, scenario, attachedInventory]);
 
   const suggestions = scenario === "emergency" ? [
     "200 картин, 300 кераміки, 12 годин, 1 авто",
@@ -453,6 +616,28 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
                   </button>
                 ))}
               </div>
+
+              {/* Inventory upload hint */}
+              <div className="mt-8 w-full max-w-lg border border-dashed border-border px-4 py-3 text-center">
+                <p className="text-xs text-text-muted mb-2">
+                  Або завантажте інвентар (CSV / XLSX) — система розпізнає колонки,
+                  пріоритезує предмети та підготує план.
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-1.5 text-xs font-medium border border-border hover:bg-surface-hover"
+                  >
+                    Обрати файл
+                  </button>
+                  <button
+                    onClick={loadDemoFile}
+                    className="px-3 py-1.5 text-xs font-medium border border-border hover:bg-surface-hover text-text-secondary"
+                  >
+                    Спробувати на демо
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -469,7 +654,14 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
                 {msg.role === "assistant" ? (
                   <RenderedMarkdown content={msg.content} />
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  <>
+                    {msg.inventory && <InventoryPreview inv={msg.inventory} />}
+                    {(msg.displayText || msg.content) && (
+                      <p className="text-sm whitespace-pre-wrap">
+                        {msg.displayText ?? msg.content}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -505,21 +697,83 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
           className="max-w-3xl mx-auto"
         >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt,.xlsx,.xls"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+            }}
+            aria-label="Завантажити файл інвентаря"
+          />
+
+          {attachedInventory && (
+            <div className="mb-2 flex items-center justify-between gap-2 px-3 py-2 border border-accent/40 bg-accent-soft/30">
+              <div className="flex items-center gap-2 min-w-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span className="text-xs font-medium truncate">
+                  {attachedInventory.sourceFileName}
+                </span>
+                <span className="text-[10px] font-mono text-text-muted whitespace-nowrap">
+                  · {attachedInventory.totalItems} поз. · 🔴 {attachedInventory.prioritized.red} · 🟡 {attachedInventory.prioritized.yellow} · 🟢 {attachedInventory.prioritized.green}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAttachedInventory(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                aria-label="Прибрати файл"
+                className="flex-shrink-0 text-text-muted hover:text-text text-sm leading-none"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
+          {uploadError && (
+            <div className="mb-2 px-3 py-2 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              {uploadError}
+            </div>
+          )}
+
           <div className="flex items-end gap-2 border border-border bg-bg p-1.5 focus-within:border-text/40">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isStreaming || isParsing}
+              aria-label="Прикріпити інвентар (CSV/XLSX)"
+              title="Прикріпити інвентар (CSV/XLSX)"
+              className="flex-shrink-0 p-2 text-text-muted hover:text-text disabled:opacity-30"
+            >
+              {isParsing ? (
+                <div className="w-4 h-4 rounded-full border-2 border-text/30 border-t-text animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                </svg>
+              )}
+            </button>
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-              placeholder="Опишіть ситуацію або задайте питання..."
+              placeholder={attachedInventory ? "Уточніть запит або надішліть як є..." : "Опишіть ситуацію або задайте питання..."}
               aria-label="Повідомлення"
               data-testid="chat-input"
               className="flex-1 bg-transparent px-3 py-2 text-sm placeholder:text-text-muted focus:outline-none min-w-0"
             />
             <button
               type="submit"
-              disabled={!input.trim() || isStreaming}
+              disabled={(!input.trim() && !attachedInventory) || isStreaming}
               aria-label="Надіслати повідомлення"
               data-testid="send-button"
               className="flex-shrink-0 px-4 py-2 bg-accent text-accent-text font-bold text-xs uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed hover:bg-accent-hover transition-colors"
