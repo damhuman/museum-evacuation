@@ -403,12 +403,14 @@ function TableSandbox({
   );
 }
 
-function ResizeHandle({ onDrag }: { onDrag: (dx: number) => void }) {
+function ResizeHandle({ onResize }: { onResize: (width: number) => void }) {
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      const startX = e.clientX;
-      const onMove = (ev: MouseEvent) => onDrag(startX - ev.clientX);
+      const onMove = (ev: MouseEvent) => {
+        // width = distance from mouse to right edge of viewport
+        onResize(window.innerWidth - ev.clientX);
+      };
       const onUp = () => {
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
@@ -420,7 +422,7 @@ function ResizeHandle({ onDrag }: { onDrag: (dx: number) => void }) {
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     },
-    [onDrag]
+    [onResize]
   );
 
   return (
@@ -724,12 +726,9 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
   const [sandboxOpen, setSandboxOpen] = useState(false);
   const [sandboxWidth, setSandboxWidth] = useState(SANDBOX_DEFAULT_W);
   const [sandboxFullscreen, setSandboxFullscreen] = useState(false);
-  const sandboxWidthRef = useRef(SANDBOX_DEFAULT_W);
 
-  const handleResizeDrag = useCallback((dx: number) => {
-    const next = Math.max(SANDBOX_MIN_W, Math.min(SANDBOX_MAX_W, sandboxWidthRef.current + dx));
-    sandboxWidthRef.current = next;
-    setSandboxWidth(next);
+  const handleResize = useCallback((width: number) => {
+    setSandboxWidth(Math.max(SANDBOX_MIN_W, Math.min(SANDBOX_MAX_W, width)));
   }, []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -994,7 +993,7 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       {/* Table Sandbox — right panel (desktop) */}
       {sandboxOpen && sandboxTables && sandboxTables.length > 0 && !sandboxFullscreen && (
         <div className="hidden lg:flex flex-shrink-0" style={{ width: sandboxWidth }}>
-          <ResizeHandle onDrag={handleResizeDrag} />
+          <ResizeHandle onResize={handleResize} />
           <div className="flex-1 min-w-0">
             <TableSandbox
               tables={sandboxTables}
@@ -1004,6 +1003,26 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
             />
           </div>
         </div>
+      )}
+
+      {/* Reopen tab — desktop right edge */}
+      {!sandboxOpen && !sandboxFullscreen && sandboxTables && sandboxTables.length > 0 && (
+        <button
+          onClick={() => setSandboxOpen(true)}
+          className="hidden lg:flex flex-col items-center justify-center gap-1 w-10 flex-shrink-0 border-l border-border bg-surface/50 hover:bg-surface-hover transition-colors"
+          title="Відкрити таблиці"
+          aria-label="Відкрити таблиці"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+          <span className="text-[9px] font-bold text-text-muted writing-mode-vertical" style={{ writingMode: "vertical-rl" }}>
+            {sandboxTables.reduce((s, t) => s + t.rows.length, 0)} рядків
+          </span>
+        </button>
       )}
       </div>{/* end flex-1 flex */}
 
