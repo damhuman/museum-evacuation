@@ -158,6 +158,184 @@ function parseTableRows(lines: string[]): string[][] {
     );
 }
 
+interface ExtractedTable {
+  header: string[];
+  rows: string[][];
+  title?: string;
+}
+
+function extractMarkdownTables(content: string): ExtractedTable[] {
+  const lines = content.split("\n");
+  const tables: ExtractedTable[] = [];
+  let buf: string[] = [];
+  let lastHeading = "";
+
+  const flush = () => {
+    if (buf.length < 2) { buf = []; return; }
+    const parsed = parseTableRows(buf);
+    if (parsed.length >= 2) {
+      tables.push({
+        header: parsed[0],
+        rows: parsed.slice(1),
+        title: lastHeading || undefined,
+      });
+    }
+    buf = [];
+  };
+
+  for (const line of lines) {
+    if (line.trimStart().startsWith("|") && line.trimEnd().endsWith("|")) {
+      buf.push(line);
+    } else {
+      flush();
+      const h = line.match(/^#{1,3}\s+(.+)/);
+      if (h) lastHeading = h[1].replace(/\*\*/g, "");
+    }
+  }
+  flush();
+  return tables;
+}
+
+function tableToCsvBlob(table: ExtractedTable): Blob {
+  const escape = (s: string) => {
+    const clean = s.replace(/[🔴🟡🟢⚠️✅❌✗📦🚛]/gu, "").trim();
+    if (clean.includes(",") || clean.includes('"') || clean.includes("\n")) {
+      return `"${clean.replace(/"/g, '""')}"`;
+    }
+    return clean;
+  };
+  const rows = [table.header, ...table.rows];
+  const csv = rows.map((r) => r.map(escape).join(",")).join("\n");
+  return new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+}
+
+function TableSandbox({
+  tables,
+  onClose,
+}: {
+  tables: ExtractedTable[];
+  onClose: () => void;
+}) {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const table = tables[activeIdx];
+  if (!table) return null;
+
+  const downloadCsv = () => {
+    const blob = tableToCsvBlob(table);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `museumaid-table-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="flex flex-col h-full border-l border-border bg-bg">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-surface/50">
+        <div className="flex items-center gap-2 min-w-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0 text-accent">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+          <span className="text-xs font-bold truncate">
+            {table.title || "Таблиця"}
+          </span>
+          <span className="text-[10px] text-text-muted">
+            {table.rows.length} рядків
+          </span>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={downloadCsv}
+            className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent text-accent-text hover:bg-accent-hover transition-colors"
+            title="Завантажити CSV"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            CSV
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 text-text-muted hover:text-text"
+            aria-label="Закрити панель"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs if multiple tables */}
+      {tables.length > 1 && (
+        <div className="flex border-b border-border bg-surface/30 overflow-x-auto">
+          {tables.map((t, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveIdx(i)}
+              className={`px-3 py-1.5 text-[10px] font-medium whitespace-nowrap border-b-2 transition-colors ${
+                i === activeIdx
+                  ? "border-accent text-text"
+                  : "border-transparent text-text-muted hover:text-text"
+              }`}
+            >
+              {t.title || `Таблиця ${i + 1}`}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Table body */}
+      <div className="flex-1 overflow-auto">
+        <table className="w-full text-xs">
+          <thead className="bg-surface/60 sticky top-0 z-10">
+            <tr>
+              {table.header.map((h, i) => (
+                <th
+                  key={i}
+                  className="px-2.5 py-2 text-left font-semibold text-text-secondary border-b border-border whitespace-nowrap"
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map((row, ri) => (
+              <tr key={ri} className={ri % 2 === 1 ? "bg-surface/30" : ""}>
+                {row.map((cell, ci) => (
+                  <td
+                    key={ci}
+                    className="px-2.5 py-1.5 border-b border-border text-text-secondary"
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer summary */}
+      <div className="px-3 py-2 border-t border-border bg-surface/30 text-[10px] text-text-muted flex items-center justify-between">
+        <span>
+          {table.header.length} колонок · {table.rows.length} рядків
+        </span>
+        <span>MuseumAID</span>
+      </div>
+    </div>
+  );
+}
+
 function RenderedMarkdown({ content }: { content: string }) {
   const [checked, setChecked] = useState<Record<number, boolean>>({});
   const toggleCheck = (index: number) => {
@@ -444,6 +622,10 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
     useState<ParsedInventory | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [sandboxTables, setSandboxTables] = useState<ExtractedTable[] | null>(
+    null
+  );
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -546,6 +728,11 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           accumulated += decoder.decode(value, { stream: true });
           setStreamingContent(accumulated);
         }
+        const tables = extractMarkdownTables(accumulated);
+        if (tables.length > 0) {
+          setSandboxTables(tables);
+          setSandboxOpen(true);
+        }
         setMessages((prev) => [
           ...prev,
           { id: assistantId, role: "assistant", content: accumulated },
@@ -583,6 +770,7 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       {/* Agent Pipeline */}
       <AgentPipeline activeAgent={activeAgent} completedAgents={completedAgents} />
 
+      <div className="flex-1 flex overflow-hidden">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto" role="log" aria-live="polite">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
@@ -690,6 +878,44 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* Table Sandbox — right panel (desktop) */}
+      {sandboxOpen && sandboxTables && sandboxTables.length > 0 && (
+        <div className="hidden lg:flex w-[420px] flex-shrink-0">
+          <TableSandbox
+            tables={sandboxTables}
+            onClose={() => setSandboxOpen(false)}
+          />
+        </div>
+      )}
+      </div>{/* end flex-1 flex */}
+
+      {/* Mobile sandbox toggle */}
+      {sandboxTables && sandboxTables.length > 0 && (
+        <div className="lg:hidden border-t border-border">
+          {sandboxOpen ? (
+            <div className="max-h-[50vh] flex flex-col">
+              <TableSandbox
+                tables={sandboxTables}
+                onClose={() => setSandboxOpen(false)}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setSandboxOpen(true)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="3" y1="15" x2="21" y2="15" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+              Показати таблицю ({sandboxTables.reduce((s, t) => s + t.rows.length, 0)} рядків)
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Input + Export */}
       <div className="border-t border-border bg-bg p-3 sm:p-4">
