@@ -209,29 +209,60 @@ function tableToCsvBlob(table: ExtractedTable): Blob {
   return new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
 }
 
+function inventoryToTable(inv: ParsedInventory): ExtractedTable {
+  return {
+    header: ["#", "Інв. номер", "Назва", "Матеріал", "Стан", "Цінність", "К-сть", "Розміри", "Пріоритет"],
+    rows: inv.items.map((it, i) => [
+      String(i + 1),
+      it.id || "",
+      it.name,
+      it.material || "",
+      it.condition || "",
+      it.value || "",
+      String(it.count ?? 1),
+      it.dimensions || "",
+      it.priority === "red" ? "🔴 негайно" : it.priority === "yellow" ? "🟡 другий" : "🟢 якщо є час",
+    ]),
+    title: `Пріоритезація — ${inv.sourceFileName}`,
+  };
+}
+
+const SANDBOX_MIN_W = 320;
+const SANDBOX_MAX_W = 1200;
+const SANDBOX_DEFAULT_W = 480;
+
 function TableSandbox({
   tables,
   onClose,
+  isFullscreen,
+  onToggleFullscreen,
 }: {
   tables: ExtractedTable[];
   onClose: () => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
-  const table = tables[activeIdx];
+  const table = tables[Math.min(activeIdx, tables.length - 1)];
   if (!table) return null;
 
-  const downloadCsv = () => {
-    const blob = tableToCsvBlob(table);
+  const downloadCsv = (t: ExtractedTable) => {
+    const blob = tableToCsvBlob(t);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `museumaid-table-${new Date().toISOString().slice(0, 10)}.csv`;
+    const slug = (t.title || "table").replace(/[^a-zA-Zа-яА-ЯіІїЇєЄґҐ0-9]/g, "-").slice(0, 40);
+    a.download = `museumaid-${slug}-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  const downloadAll = () => {
+    tables.forEach((t) => downloadCsv(t));
+  };
+
   return (
-    <div className="flex flex-col h-full border-l border-border bg-bg">
+    <div className="flex flex-col h-full bg-bg">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-border bg-surface/50">
         <div className="flex items-center gap-2 min-w-0">
@@ -249,8 +280,22 @@ function TableSandbox({
           </span>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
+          {tables.length > 1 && (
+            <button
+              onClick={downloadAll}
+              className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium border border-border text-text-secondary hover:bg-surface-hover transition-colors"
+              title="Завантажити всі таблиці"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Всі CSV
+            </button>
+          )}
           <button
-            onClick={downloadCsv}
+            onClick={() => downloadCsv(table)}
             className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent text-accent-text hover:bg-accent-hover transition-colors"
             title="Завантажити CSV"
           >
@@ -260,6 +305,28 @@ function TableSandbox({
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             CSV
+          </button>
+          <button
+            onClick={onToggleFullscreen}
+            className="p-1 text-text-muted hover:text-text"
+            aria-label={isFullscreen ? "Згорнути" : "На весь екран"}
+            title={isFullscreen ? "Згорнути" : "На весь екран"}
+          >
+            {isFullscreen ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="4 14 10 14 10 20" />
+                <polyline points="20 10 14 10 14 4" />
+                <line x1="14" y1="10" x2="21" y2="3" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 3 21 3 21 9" />
+                <polyline points="9 21 3 21 3 15" />
+                <line x1="21" y1="3" x2="14" y2="10" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            )}
           </button>
           <button
             onClick={onClose}
@@ -274,7 +341,7 @@ function TableSandbox({
         </div>
       </div>
 
-      {/* Tabs if multiple tables */}
+      {/* Tabs */}
       {tables.length > 1 && (
         <div className="flex border-b border-border bg-surface/30 overflow-x-auto">
           {tables.map((t, i) => (
@@ -282,7 +349,7 @@ function TableSandbox({
               key={i}
               onClick={() => setActiveIdx(i)}
               className={`px-3 py-1.5 text-[10px] font-medium whitespace-nowrap border-b-2 transition-colors ${
-                i === activeIdx
+                i === Math.min(activeIdx, tables.length - 1)
                   ? "border-accent text-text"
                   : "border-transparent text-text-muted hover:text-text"
               }`}
@@ -325,7 +392,7 @@ function TableSandbox({
         </table>
       </div>
 
-      {/* Footer summary */}
+      {/* Footer */}
       <div className="px-3 py-2 border-t border-border bg-surface/30 text-[10px] text-text-muted flex items-center justify-between">
         <span>
           {table.header.length} колонок · {table.rows.length} рядків
@@ -333,6 +400,35 @@ function TableSandbox({
         <span>MuseumAID</span>
       </div>
     </div>
+  );
+}
+
+function ResizeHandle({ onDrag }: { onDrag: (dx: number) => void }) {
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const onMove = (ev: MouseEvent) => onDrag(startX - ev.clientX);
+      const onUp = () => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      };
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [onDrag]
+  );
+
+  return (
+    <div
+      onMouseDown={handleMouseDown}
+      className="w-1.5 cursor-col-resize hover:bg-accent/40 active:bg-accent/60 transition-colors flex-shrink-0 border-l border-border"
+      aria-label="Змінити ширину панелі"
+    />
   );
 }
 
@@ -626,6 +722,15 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
     null
   );
   const [sandboxOpen, setSandboxOpen] = useState(false);
+  const [sandboxWidth, setSandboxWidth] = useState(SANDBOX_DEFAULT_W);
+  const [sandboxFullscreen, setSandboxFullscreen] = useState(false);
+  const sandboxWidthRef = useRef(SANDBOX_DEFAULT_W);
+
+  const handleResizeDrag = useCallback((dx: number) => {
+    const next = Math.max(SANDBOX_MIN_W, Math.min(SANDBOX_MAX_W, sandboxWidthRef.current + dx));
+    sandboxWidthRef.current = next;
+    setSandboxWidth(next);
+  }, []);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -687,6 +792,11 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       : textForUser;
 
     setInput("");
+    if (inv) {
+      const priorityTable = inventoryToTable(inv);
+      setSandboxTables([priorityTable]);
+      setSandboxOpen(true);
+    }
     setAttachedInventory(null);
     setUploadError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -728,9 +838,11 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
           accumulated += decoder.decode(value, { stream: true });
           setStreamingContent(accumulated);
         }
-        const tables = extractMarkdownTables(accumulated);
-        if (tables.length > 0) {
-          setSandboxTables(tables);
+        const agentTables = extractMarkdownTables(accumulated);
+        if (agentTables.length > 0) {
+          setSandboxTables((prev) =>
+            prev ? [...prev, ...agentTables] : agentTables
+          );
           setSandboxOpen(true);
         }
         setMessages((prev) => [
@@ -880,24 +992,43 @@ export function ChatInterface({ scenario }: { scenario?: string }) {
       </div>
 
       {/* Table Sandbox — right panel (desktop) */}
-      {sandboxOpen && sandboxTables && sandboxTables.length > 0 && (
-        <div className="hidden lg:flex w-[420px] flex-shrink-0">
-          <TableSandbox
-            tables={sandboxTables}
-            onClose={() => setSandboxOpen(false)}
-          />
+      {sandboxOpen && sandboxTables && sandboxTables.length > 0 && !sandboxFullscreen && (
+        <div className="hidden lg:flex flex-shrink-0" style={{ width: sandboxWidth }}>
+          <ResizeHandle onDrag={handleResizeDrag} />
+          <div className="flex-1 min-w-0">
+            <TableSandbox
+              tables={sandboxTables}
+              onClose={() => setSandboxOpen(false)}
+              isFullscreen={false}
+              onToggleFullscreen={() => setSandboxFullscreen(true)}
+            />
+          </div>
         </div>
       )}
       </div>{/* end flex-1 flex */}
 
+      {/* Fullscreen sandbox overlay */}
+      {sandboxOpen && sandboxFullscreen && sandboxTables && sandboxTables.length > 0 && (
+        <div className="fixed inset-0 z-[100] bg-bg flex flex-col">
+          <TableSandbox
+            tables={sandboxTables}
+            onClose={() => { setSandboxFullscreen(false); setSandboxOpen(false); }}
+            isFullscreen={true}
+            onToggleFullscreen={() => setSandboxFullscreen(false)}
+          />
+        </div>
+      )}
+
       {/* Mobile sandbox toggle */}
-      {sandboxTables && sandboxTables.length > 0 && (
+      {sandboxTables && sandboxTables.length > 0 && !sandboxFullscreen && (
         <div className="lg:hidden border-t border-border">
           {sandboxOpen ? (
             <div className="max-h-[50vh] flex flex-col">
               <TableSandbox
                 tables={sandboxTables}
                 onClose={() => setSandboxOpen(false)}
+                isFullscreen={false}
+                onToggleFullscreen={() => setSandboxFullscreen(true)}
               />
             </div>
           ) : (
