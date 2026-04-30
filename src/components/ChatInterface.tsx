@@ -142,7 +142,7 @@ function parseActiveAgent(content: string): { active: string | null; completed: 
     if (!completed.includes("triage")) completed.push("triage");
     active = "logistics";
   }
-  if (content.includes("ТАКЕЛАЖ")) {
+  if (content.includes("ПІДГОТОВКА ВАНТАЖУ")) {
     if (active === "logistics") completed.push("logistics");
     if (!completed.includes("packing")) completed.push("packing");
     if (!completed.includes("triage")) completed.push("triage");

@@ -5,7 +5,7 @@ const agents = [
   { id: "triage", label: "Тріаж", icon: "🔴" },
   { id: "packing", label: "Пакування", icon: "📦" },
   { id: "logistics", label: "Логістика", icon: "🚛" },
-  { id: "rigging", label: "Такелаж", icon: "🏗️" },
+  { id: "rigging", label: "Підготовка вантажу", icon: "🏗️" },
 ];
 
 interface AgentPipelineProps {
