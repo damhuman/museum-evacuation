@@ -13,6 +13,7 @@ const AGENT_HEADERS: Record<string, string> = {
   triage: "## 🔴 ТРІАЖ — пріоритезація евакуації\n\n",
   packing: "## 📦 ПАКУВАННЯ — інструкції\n\n",
   logistics: "## 🚛 ЛОГІСТИКА — маршрути та документи\n\n",
+  rigging: "## 🏗️ ТАКЕЛАЖ — вага, бригада, обладнання\n\n",
 };
 
 function buildAgentContext(orchestratorResult: OrchestratorResult): string {

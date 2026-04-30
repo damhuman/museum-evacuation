@@ -142,6 +142,12 @@ function parseActiveAgent(content: string): { active: string | null; completed: 
     if (!completed.includes("triage")) completed.push("triage");
     active = "logistics";
   }
+  if (content.includes("ТАКЕЛАЖ")) {
+    if (active === "logistics") completed.push("logistics");
+    if (!completed.includes("packing")) completed.push("packing");
+    if (!completed.includes("triage")) completed.push("triage");
+    active = "rigging";
+  }
   if (content.includes("довідковий характер")) {
     if (active) completed.push(active);
     active = null;
@@ -198,7 +204,7 @@ function extractMarkdownTables(content: string): ExtractedTable[] {
 
 function tableToCsvBlob(table: ExtractedTable): Blob {
   const escape = (s: string) => {
-    const clean = s.replace(/[🔴🟡🟢⚠️✅❌✗📦🚛]/gu, "").trim();
+    const clean = s.replace(/[🔴🟡🟢⚠️✅❌✗📦🚛🏗️]/gu, "").trim();
     if (clean.includes(",") || clean.includes('"') || clean.includes("\n")) {
       return `"${clean.replace(/"/g, '""')}"`;
     }

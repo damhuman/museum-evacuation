@@ -13,7 +13,7 @@ export interface OrchestratorResult {
   intent: string;
   action: "ask_questions" | "route_agents";
   questions?: string[];
-  agents: ("triage" | "packing" | "logistics")[];
+  agents: ("triage" | "packing" | "logistics" | "rigging")[];
   params: {
     collection_types?: string[];
     item_count?: Record<string, number>;
